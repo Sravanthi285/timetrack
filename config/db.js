@@ -1,52 +1,78 @@
-const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-// Database file path
-const dbPath = path.resolve(__dirname, '../database.sqlite');
+let db;
 
-const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) {
-        console.error('Error opening database ' + dbPath + ': ' + err.message);
-    } else {
-        console.log('Connected to the SQLite database.');
-        initDb();
-    }
-});
+// CHECK: Do we have MySQL credentials?
+if (process.env.DB_HOST) {
+    // --- MySQL Mode ---
+    const mysql = require('mysql2');
+    console.log('Environment detected: Using MySQL Database');
 
-// Wrapper to mimic MySQL's query interface
-const dbWrapper = {
-    query: (sql, params, callback) => {
-        if (typeof params === 'function') {
-            callback = params;
-            params = [];
-        }
+    const pool = mysql.createPool({
+        host: process.env.DB_HOST,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0
+    });
 
-        // Simple heuristic: SELECT uses .all(), otherwise use .run()
-        const command = sql.trim().split(' ')[0].toUpperCase();
-
-        if (command === 'SELECT') {
-            db.all(sql, params, (err, rows) => {
-                if (callback) callback(err, rows);
-            });
-        } else {
-            db.run(sql, params, function (err) {
-                if (callback) {
-                    // Mimic mysql result object
-                    const result = {
-                        insertId: this.lastID,
-                        affectedRows: this.changes
-                    };
-                    callback(err, result);
-                }
+    // Wrapper to unify API
+    db = {
+        query: (sql, params, callback) => {
+            pool.query(sql, params, (err, results) => {
+                if (callback) callback(err, results);
             });
         }
-    }
-};
+    };
 
-function initDb() {
-    db.serialize(() => {
-        // Users Table
-        db.run(`CREATE TABLE IF NOT EXISTS users (
+    // Auto-init tables for MySQL
+    // Note: In production MySQL, it's better to run migrations manually, 
+    // but for this portfolio self-healing behavior, we'll run a check.
+    // (Simulating init by just ensuring connection works)
+    pool.getConnection((err, connection) => {
+        if (err) console.error('MySQL Connection Error:', err);
+        else {
+            console.log('Connected to MySQL successfully.');
+            connection.release();
+        }
+    });
+
+} else {
+    // --- SQLite Mode (Fallback/Dev) ---
+    console.log('No MySQL Config detected: Using SQLite (Embedded)');
+    const sqlite3 = require('sqlite3').verbose();
+    const dbPath = path.resolve(__dirname, '../database.sqlite');
+
+    const sqliteDb = new sqlite3.Database(dbPath, (err) => {
+        if (err) console.error('Error opening SQLite: ' + err.message);
+        else {
+            console.log('Connected to SQLite.');
+            initSqlite(sqliteDb);
+        }
+    });
+
+    db = {
+        query: (sql, params, callback) => {
+            if (typeof params === 'function') { callback = params; params = []; }
+            const command = sql.trim().split(' ')[0].toUpperCase();
+            if (command === 'SELECT') {
+                sqliteDb.all(sql, params, (err, rows) => { if (callback) callback(err, rows); });
+            } else {
+                sqliteDb.run(sql, params, function (err) {
+                    if (callback) {
+                        callback(err, { insertId: this.lastID, affectedRows: this.changes });
+                    }
+                });
+            }
+        }
+    };
+}
+
+function initSqlite(targetDb) {
+    targetDb.serialize(() => {
+        targetDb.run(`CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             email TEXT NOT NULL UNIQUE,
@@ -54,9 +80,7 @@ function initDb() {
             role TEXT DEFAULT 'EMPLOYEE',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
-
-        // Attendance Table
-        db.run(`CREATE TABLE IF NOT EXISTS attendance (
+        targetDb.run(`CREATE TABLE IF NOT EXISTS attendance (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
             date TEXT NOT NULL,
@@ -64,9 +88,7 @@ function initDb() {
             status TEXT DEFAULT 'Present',
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )`);
-
-        // Leaves Table
-        db.run(`CREATE TABLE IF NOT EXISTS leaves (
+        targetDb.run(`CREATE TABLE IF NOT EXISTS leaves (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
             from_date TEXT NOT NULL,
@@ -77,18 +99,14 @@ function initDb() {
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )`);
 
-        // Create Admin if not exists
-        const checkAdmin = "SELECT * FROM users WHERE email = ?";
-        db.get(checkAdmin, ['admin@timetrack.com'], (err, row) => {
+        // Default Admin
+        targetDb.get("SELECT * FROM users WHERE email = ?", ['admin@timetrack.com'], (err, row) => {
             if (!row) {
-                const insertAdmin = "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)";
-                db.run(insertAdmin, ['Admin User', 'admin@timetrack.com', 'admin123', 'ADMIN'], (err) => {
-                    if (err) console.error(err.message);
-                    else console.log('Default Admin created.');
-                });
+                targetDb.run("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
+                    ['Admin User', 'admin@timetrack.com', 'admin123', 'ADMIN']);
             }
         });
     });
 }
 
-module.exports = dbWrapper;
+module.exports = db;
