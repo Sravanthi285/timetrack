@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - TimeTrack</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+</head>
+
+<body class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <span class="material-icons-round" style="font-size: 48px; color: var(--primary-color);">person_add</span>
+            <h1>Create Account</h1>
+            <p style="color: grey;">Join TimeTrack today</p>
+        </div>
+
+        <form id="registerForm">
+            <div class="input-group">
+                <input type="text" id="name" placeholder="Full Name" required>
+            </div>
+
+            <div class="input-group">
+                <input type="email" id="email" placeholder="Email" required>
+            </div>
+
+            <div class="input-group">
+                <input type="password" id="password" placeholder="Password" required>
+            </div>
+
+            <div class="input-group">
+                <select id="role">
+                    <option value="EMPLOYEE">Employee</option>
+                    <option value="ADMIN">Admin</option>
+                </select>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 32px;">
+                <a href="login.html" style="text-decoration: none; color: var(--primary-color); font-weight: 500;">Sign
+                    in instead</a>
+                <button type="submit">Register</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <script src="js/script.js"></script>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+
+            btn.innerHTML = 'Creating...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, role })
+                });
+
+                if (res.ok) {
+                    showToast('Account created successfully!', 'Login Now', () => {
+                        window.location.href = 'login.html';
+                    });
+                    setTimeout(() => window.location.href = 'login.html', 1500);
+                } else {
+                    const data = await res.json();
+                    showToast(data.error);
+                    btn.innerHTML = 'Register';
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error registering:', error);
+                showToast('Network error');
+                btn.innerHTML = 'Register';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>

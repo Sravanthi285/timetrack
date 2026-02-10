@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - TimeTrack</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="app-bar-title">
+            <span class="material-icons-round brand-icon">admin_panel_settings</span>
+            Admin Console
+        </div>
+        <div class="nav-links">
+            <a href="#" onclick="logout()" class="nav-link">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard-grid">
+            <div class="card stat-card">
+                <span class="stat-value" id="presentToday">0</span>
+                <span class="stat-label">Present Today</span>
+            </div>
+            <div class="card stat-card">
+                <span class="stat-value" id="pendingLeaves">0</span>
+                <span class="stat-label">Pending Reviews</span>
+            </div>
+            <div class="card stat-card">
+                <span class="stat-value" id="totalEmployees">5+</span>
+                <span class="stat-label">Total Staff</span>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <!-- Leave Requests -->
+            <div>
+                <h2 style="font-size: 20px;">Pending Actions</h2>
+                <div class="card" style="padding: 0; min-height: 400px;">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Reason</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allLeavesBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attendance Feed -->
+            <div>
+                <h2 style="font-size: 20px;">Live Attendance Feed</h2>
+                <div class="card" style="padding: 0; min-height: 400px;">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allAttendanceBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="js/script.js"></script>
+    <script>
+        const user = checkAuth();
+        if (user.role !== 'ADMIN') window.location.href = 'dashboard.html';
+
+        async function loadDashboardData() {
+            // Fetch All Attendance
+            const attRes = await fetch(`${API_URL}/attendance`);
+            const attData = await attRes.json();
+
+            const attBody = document.getElementById('allAttendanceBody');
+            attBody.innerHTML = '';
+
+            let presentCount = 0;
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            if (attData.length === 0) attBody.innerHTML = '<tr><td colspan="3" class="text-center">No records</td></tr>';
+
+            attData.slice(0, 10).forEach(r => {
+                const row = `<tr>
+                    <td>
+                        <div style="font-weight: 500;">${r.name}</div>
+                        <div style="font-size: 12px; color: var(--text-secondary);">${formatDate(r.date)}</div>
+                    </td>
+                    <td>${r.check_in_time}</td>
+                    <td><span class="status-chip status-${r.status}">${r.status}</span></td>
+                </tr>`;
+                attBody.innerHTML += row;
+
+                if (r.date.startsWith(todayStr)) presentCount++;
+            });
+            document.getElementById('presentToday').innerText = presentCount;
+
+            // Fetch All Leaves
+            const leaveRes = await fetch(`${API_URL}/leave`);
+            const leaveData = await leaveRes.json();
+
+            const leaveBody = document.getElementById('allLeavesBody');
+            leaveBody.innerHTML = '';
+            let pendingCount = 0;
+
+            const pendingLeaves = leaveData.filter(l => l.status === 'Pending');
+            pendingCount = pendingLeaves.length;
+
+            if (pendingLeaves.length === 0) {
+                leaveBody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px;">All caught up!</td></tr>';
+            } else {
+                pendingLeaves.forEach(l => {
+                    const row = `<tr>
+                        <td>
+                            <div style="font-weight: 500;">${l.name}</div>
+                            <div style="font-size: 11px; color: #666;">${formatDate(l.from_date)} - ${formatDate(l.to_date)}</div>
+                        </td>
+                        <td>${l.reason}</td>
+                        <td>
+                            <button class="secondary" style="padding: 4px; min-width: auto;" onclick="updateLeave(${l.id}, 'approve')" title="Approve">
+                                <span class="material-icons-round" style="color: var(--success-color);">check_circle</span>
+                            </button>
+                            <button class="secondary" style="padding: 4px; min-width: auto;" onclick="updateLeave(${l.id}, 'reject')" title="Reject">
+                                <span class="material-icons-round" style="color: var(--error-color);">cancel</span>
+                            </button>
+                        </td>
+                    </tr>`;
+                    leaveBody.innerHTML += row;
+                });
+            }
+            document.getElementById('pendingLeaves').innerText = pendingCount;
+        }
+
+        async function updateLeave(id, action) {
+            // Optimistic UI update could go here, but for now we reload
+            const payload = action === 'approve' ? 'Approved' : 'Rejected';
+
+            const res = await fetch(`${API_URL}/leave/${action}/${id}`, { method: 'PUT' });
+            if (res.ok) {
+                showToast(`Leave ${payload}`);
+                loadDashboardData();
+            } else {
+                showToast('Error updating leave');
+            }
+        }
+
+        loadDashboardData();
+    </script>
+</body>
+
+</html>

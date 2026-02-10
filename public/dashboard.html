@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - TimeTrack</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="app-bar-title">
+            <span class="material-icons-round brand-icon">schedule</span>
+            TimeTrack
+        </div>
+        <div class="nav-links">
+            <span id="userName" style="padding: 8px 12px; font-weight: 500;">User</span>
+            <a href="#" onclick="logout()" class="nav-link">
+                <span class="material-icons-round">logout</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard-grid">
+            <!-- Welcome Card -->
+            <div class="card stat-card">
+                <span class="stat-label">Welcome back</span>
+                <span class="stat-value" id="greetingName"
+                    style="font-size: 32px; color: var(--text-primary);">Employee</span>
+                <p style="color: var(--text-secondary); margin: 0;">Have a productive day!</p>
+            </div>
+
+            <!-- Date Card -->
+            <div class="card stat-card">
+                <span class="stat-label">Today</span>
+                <span class="stat-value" id="todayDate" style="font-size: 32px;">-</span>
+                <div style="margin-top: auto; width: 100%;">
+                    <button id="markAttendanceBtn" onclick="markAttendance()" style="width: 100%;">
+                        <span class="material-icons-round">check_circle</span>
+                        Mark Present
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card stat-card">
+                <span class="stat-label">Quick Actions</span>
+                <div style="display: flex; flex-direction: column; gap: 12px; width: 100%; margin-top: 16px;">
+                    <button class="secondary" onclick="window.location.href='attendance.html'"
+                        style="justify-content: flex-start;">
+                        <span class="material-icons-round">history</span> View History
+                    </button>
+                    <button class="secondary" onclick="window.location.href='leave.html'"
+                        style="justify-content: flex-start;">
+                        <span class="material-icons-round">event_note</span> Apply Leave
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <h2>Recent Activity</h2>
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentActivityBody">
+                        <tr>
+                            <td colspan="3" style="text-align: center;">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="js/script.js"></script>
+    <script>
+        const user = checkAuth();
+        document.getElementById('userName').innerText = user.name;
+        document.getElementById('greetingName').innerText = user.name.split(' ')[0];
+        document.getElementById('todayDate').innerText = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+
+        if (user.role === 'ADMIN') {
+            window.location.href = 'admin.html';
+        }
+
+        async function markAttendance() {
+            const btn = document.getElementById('markAttendanceBtn');
+            btn.disabled = true;
+            btn.innerHTML = 'Marking...';
+
+            try {
+                const res = await fetch(`${API_URL}/attendance/checkin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: user.id })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    showToast('Checked in successfully', 'View History', () => window.location.href = 'attendance.html');
+                    btn.innerHTML = '<span class="material-icons-round">check</span> Checked In';
+                    btn.style.backgroundColor = 'var(--success-color)';
+                    loadRecentActivity(); // Refresh table
+                } else {
+                    showToast(data.message || data.error);
+                    btn.disabled = false;
+                    btn.innerHTML = '<span class="material-icons-round">check_circle</span> Mark Present';
+                }
+            } catch (error) {
+                console.error('Error marking attendance:', error);
+                showToast('Failed to check in');
+                btn.disabled = false;
+                btn.innerHTML = 'Try Again';
+            }
+        }
+
+        async function loadRecentActivity() {
+            const res = await fetch(`${API_URL}/attendance/${user.id}`);
+            const data = await res.json();
+            const tbody = document.getElementById('recentActivityBody');
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 24px; color: grey;">No records found</td></tr>';
+                return;
+            }
+
+            // Show only top 5
+            tbody.innerHTML = '';
+            data.slice(0, 5).forEach(record => {
+                const row = `<tr>
+                     <td>${formatDate(record.date)}</td>
+                     <td>${record.check_in_time}</td>
+                     <td><span class="status-chip status-${record.status}">${record.status}</span></td>
+                 </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        loadRecentActivity();
+    </script>
+</body>
+
+</html>

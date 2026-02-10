@@ -1,0 +1,419 @@
+/* Modern Professional Portfolio Theme */
+:root {
+    /* Indigo/Slate Palette - Distinguish from Google Blue */
+    --primary-color: #4f46e5;
+    /* Indigo 600 - Modern Tech */
+    --primary-hover: #4338ca;
+    /* Indigo 700 */
+    --background-color: #f8fafc;
+    /* Slate 50 */
+    --surface-color: #ffffff;
+
+    --text-primary: #1e293b;
+    /* Slate 800 */
+    --text-secondary: #64748b;
+    /* Slate 500 */
+    --border-color: #e2e8f0;
+    /* Slate 200 */
+
+    --success-color: #10b981;
+    /* Emerald 500 */
+    --error-color: #ef4444;
+    /* Red 500 */
+    --warning-color: #f59e0b;
+    /* Amber 500 */
+
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+    --radius: 12px;
+    --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons+Round');
+
+/* Reset & Basics */
+body {
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 0;
+    color: var(--text-primary);
+    line-height: 1.6;
+    /* improved readability */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin-top: 0;
+    font-weight: 600;
+    /* Bolder headings */
+    color: var(--text-primary);
+    letter-spacing: -0.025em;
+    /* Tight tracking for modern feel */
+}
+
+h2 {
+    font-size: 24px;
+    margin-bottom: 24px;
+}
+
+/* Layout */
+.container {
+    max-width: 1100px;
+    /* Slightly tighter container */
+    margin: 40px auto;
+    padding: 0 24px;
+    width: 100%;
+    box-sizing: border-box;
+    flex: 1;
+}
+
+/* Cards */
+.card {
+    background: var(--surface-color);
+    border-radius: var(--radius);
+    padding: 32px;
+    /* Generous padding */
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    /* Subtle border definition */
+    margin-bottom: 24px;
+}
+
+/* Inputs - Floating Label Style */
+.input-group {
+    position: relative;
+    margin-bottom: 24px;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 15px;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    outline: none;
+    background: #ffffff;
+    font-family: inherit;
+    color: var(--text-primary);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    /* Indigo glow */
+}
+
+/* Buttons */
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 8px;
+    /* Softer corners */
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.25px;
+    transition: all 0.2s;
+    box-shadow: var(--shadow-sm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+button:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+button.secondary {
+    background-color: white;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+}
+
+button.secondary:hover {
+    background-color: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+button.danger {
+    background-color: white;
+    color: var(--error-color);
+    border: 1px solid #fee2e2;
+}
+
+button.danger:hover {
+    background-color: #fef2f2;
+    border-color: #fecaca;
+}
+
+/* Auth Layout (Side by Side or Central) */
+.auth-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: var(--background-color);
+}
+
+.auth-card {
+    background: white;
+    padding: 48px;
+    border-radius: 16px;
+    /* Larger radius */
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 440px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+.auth-header {
+    margin-bottom: 32px;
+}
+
+.auth-header h1 {
+    font-size: 30px;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+/* Navbar */
+.navbar {
+    background-color: white;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    padding: 0 32px;
+    border-bottom: 1px solid var(--border-color);
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.app-bar-title {
+    font-size: 20px;
+    color: var(--text-primary);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    letter-spacing: -0.05em;
+}
+
+.brand-icon {
+    font-size: 28px;
+    color: var(--primary-color);
+}
+
+.nav-links {
+    display: flex;
+    gap: 24px;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 14px;
+    padding: 8px 0;
+    transition: color 0.2s;
+    border-bottom: 2px solid transparent;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: var(--primary-color);
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    /* Wider columns */
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-value {
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--text-primary);
+    /* Dark text for numbers */
+    margin: 8px 0;
+    letter-spacing: -0.05em;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+/* Tables */
+.table-responsive {
+    overflow-x: auto;
+    width: 100%;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+th {
+    text-align: left;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    background-color: #f8fafc;
+}
+
+td {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+/* Status Chips (Modern Pills) */
+.status-chip {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-chip::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.status-Present,
+.status-Approved {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.status-Present::before,
+.status-Approved::before {
+    background-color: #10b981;
+}
+
+.status-Absent,
+.status-Rejected {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.status-Absent::before,
+.status-Rejected::before {
+    background-color: #ef4444;
+}
+
+.status-Pending {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.status-Pending::before {
+    background-color: #f59e0b;
+}
+
+/* Toast Notifications */
+#toast-container {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    /* Bottom Right is standard for enterprise */
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.toast {
+    background-color: #1e293b;
+    /* Dark Slate */
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    min-width: 300px;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.toast-action {
+    color: #818cf8;
+    /* Indigo 400 */
+    margin-left: 24px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+/* Helper */
+.text-center {
+    text-align: center;
+}

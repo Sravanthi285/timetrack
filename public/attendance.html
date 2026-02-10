@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance History - TimeTrack</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="app-bar-title" onclick="window.location.href='dashboard.html'" style="cursor: pointer;">
+            <span class="material-icons-round brand-icon">arrow_back</span>
+            History
+        </div>
+        <div class="nav-links">
+            <span id="userName" style="padding: 8px 12px; font-weight: 500;">User</span>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card" style="padding: 0;">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceBody">
+                        <!-- Data here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        const user = checkAuth();
+        document.getElementById('userName').innerText = user.name;
+
+        async function loadAttendance() {
+            const res = await fetch(`${API_URL}/attendance/${user.id}`);
+            const data = await res.json();
+            const tbody = document.getElementById('attendanceBody');
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 32px;">No history found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.forEach(record => {
+                const row = `<tr>
+                    <td>${formatDate(record.date)}</td>
+                    <td>${record.check_in_time}</td>
+                    <td><span class="status-chip status-${record.status}">${record.status}</span></td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        loadAttendance();
+    </script>
+</body>
+
+</html>

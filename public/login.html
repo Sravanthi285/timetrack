@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - TimeTrack</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+</head>
+
+<body class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <span class="material-icons-round" style="font-size: 48px; color: var(--primary-color);">schedule</span>
+            <h1>Sign in</h1>
+            <p style="color: grey;">to continue to TimeTrack</p>
+        </div>
+
+        <form id="loginForm">
+            <div class="input-group">
+                <input type="email" id="email" placeholder="Email" required autofocus>
+            </div>
+
+            <div class="input-group">
+                <input type="password" id="password" placeholder="Password" required>
+            </div>
+
+            <div style="text-align: right; margin-bottom: 24px;">
+                <button class="secondary" type="button" onclick="alert('Contact admin for reset')">Forgot
+                    password?</button>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <a href="register.html"
+                    style="text-decoration: none; color: var(--primary-color); font-weight: 500;">Create account</a>
+                <button type="submit">Next</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <script src="js/script.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+
+            btn.innerHTML = 'Signing in...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    showToast('Welcome back!', 'Open Dashboard', () => {
+                        window.location.href = data.user.role === 'ADMIN' ? 'admin.html' : 'dashboard.html';
+                    });
+
+                    setTimeout(() => {
+                        window.location.href = data.user.role === 'ADMIN' ? 'admin.html' : 'dashboard.html';
+                    }, 1000);
+                } else {
+                    showToast(data.message || 'Login failed');
+                    btn.innerHTML = 'Next';
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error logging in:', error);
+                showToast('Network error. Check console.');
+                btn.innerHTML = 'Next';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>
