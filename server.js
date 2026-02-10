@@ -13,10 +13,13 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
-    secret: 'timetrack-secret-key',
+    secret: process.env.SESSION_SECRET || 'timetrack-secret-key', // Use env var if available
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false } // Set to true if using HTTPS
+    cookie: {
+        secure: process.env.NODE_ENV === 'production', // Secure cookies in production
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
 }));
 
 // Routes
