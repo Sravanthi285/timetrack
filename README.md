@@ -1,43 +1,142 @@
-# TimeTrack – Attendance and Leave Management System
+# ⏱️ Time Tracker – Attendance & Leave Management System
 
-A full-stack web application for managing employee attendance and leaves.
+A full-stack web application to manage employee attendance, work hours, and leave requests with admin approvals.
 
-## Tech Stack
-- **Frontend**: HTML, CSS, Vanilla JavaScript
-- **Backend**: Node.js, Express
-- **Database**: MySQL
+Live Demo:
+https://timetrack-zrdo.onrender.com
 
-## Prerequisites
-- Node.js installed
-- MySQL installed (e.g., via XAMPP or Workbench)
+---
 
-## Setup Instructions
+## ✨ Features
 
-1.  **Database Setup**
-    - Open your MySQL client (e.g., phpMyAdmin or MySQL Workbench).
-    - Import the `schema.sql` file provided in the root directory or copy-paste its content to run it.
-    - Check `config/db.js` and update the `user` and `password` if your MySQL configuration is different from the default (root/empty).
+### Employee
+- Register / Login
+- Mark daily attendance
+- Apply for leave
+- View attendance history
+- Track leave status
 
-2.  **Install Dependencies**
-    Open a terminal in the project folder and run:
-    ```bash
-    npm install
-    ```
+### Admin
+- Dashboard
+- View employees
+- Approve / Reject leave requests
+- Monitor attendance
+- Manage users
 
-3.  **Start the Server**
-    ```bash
-    npm start
-    ```
-    The server will start at `http://localhost:3000`.
+---
 
-4.  **Usage**
-    - Open your browser and go to `http://localhost:3000`.
-    - **Register** a new user. You can choose to be an **Employee** or **Admin**.
-    - **Login** with the created credentials.
-    - **Employee**: Mark attendance, view history, apply for leave.
-    - **Admin**: View dashboard stats, view all attendance, approve/reject leaves.
+## 🧰 Tech Stack
 
-## Default Admin Credentials
-If you ran the `schema.sql`, a default admin user is created:
-- **Email**: admin@timetrack.com
-- **Password**: admin123
+Frontend:
+- HTML
+- CSS
+- JavaScript
+
+Backend:
+- Node.js
+- Express.js
+
+Database:
+- MySQL
+- SQLite (local fallback)
+
+Deployment:
+- Render
+
+---
+
+## 📂 Project Structure
+
+```
+timetrack/
+├── public/
+├── routes/
+├── controllers/
+├── database/
+├── schema.sql
+├── server.js
+├── package.json
+└── README.md
+```
+
+---
+
+### Clone project
+```bash
+git clone https://github.com/Sravanthi285/timetrack.git
+cd timetrack
+  ```
+
+## ⚙️ Setup Instructions
+
+### Install dependencies
+```bash
+npm install
+```
+
+### Create MySQL database
+```sql
+CREATE DATABASE timetrack;
+```
+
+### Import schema
+```bash
+mysql -u root -p timetrack < schema.sql
+```
+
+### Create .env file
+```env
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=timetrack
+PORT=3000
+```
+
+### Start server
+```bash
+npm start
+```
+
+### Open in browser
+```
+http://localhost:3000
+```
+
+---
+
+## 🛠 API Endpoints
+
+| Method | Route | Description |
+|--------|--------|-------------|
+| POST | /login | Login |
+| POST | /register | Register |
+| POST | /attendance | Mark attendance |
+| POST | /leave | Apply leave |
+| GET | /admin/users | Get users |
+
+---
+
+## 🔮 Future Improvements
+
+- JWT authentication
+- Email notifications
+- Reports export
+- Charts dashboard
+- Mobile responsive UI
+
+---
+
+## 👩‍💻 Author
+
+Karnapu Sravanthi  
+GitHub: https://github.com/Sravanthi285
+
+---
+
+## 📄 License
+
+MIT
+
+
+
