@@ -31,6 +31,11 @@ app.use('/api/auth', authRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/leave', leaveRoutes);
 
+// Health Check Route
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok', database: process.env.DB_HOST ? 'MySQL' : 'SQLite' });
+});
+
 // Serve Frontend (SPA-like approach for simplicity, or just static files)
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
